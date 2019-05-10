@@ -3534,10 +3534,10 @@ public final class R {
     public static final int beginning=0x7f08002b;
     public static final int blocking=0x7f08002c;
     public static final int bottom=0x7f08002d;
-    public static final int button=0x7f08002e;
-    public static final int button2=0x7f08002f;
-    public static final int button3=0x7f080030;
-    public static final int buttonPanel=0x7f080031;
+    public static final int buttonPanel=0x7f08002e;
+    public static final int button_cancel=0x7f08002f;
+    public static final int button_search=0x7f080030;
+    public static final int button_send=0x7f080031;
     public static final int cancel_action=0x7f080032;
     public static final int center=0x7f080033;
     public static final int center_horizontal=0x7f080034;

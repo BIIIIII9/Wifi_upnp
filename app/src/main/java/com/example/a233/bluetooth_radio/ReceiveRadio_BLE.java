@@ -21,6 +21,7 @@ import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
+import android.net.wifi.p2p.nsd.WifiP2pUpnpServiceRequest;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -62,7 +63,7 @@ public class ReceiveRadio_BLE extends Service {
     List<WifiP2pDevice> list = new ArrayList<WifiP2pDevice>();
     BroadcastReceiver myP2PReceiver;
     long startSystemTime = System.currentTimeMillis();
-    WifiP2pDnsSdServiceRequest serviceRequest;
+    WifiP2pUpnpServiceRequest serviceRequest;
     final int timeTheNextReSetDiscover=20000;
 
     @Override
@@ -186,42 +187,52 @@ public class ReceiveRadio_BLE extends Service {
         });
     }
     void prepareDiscoverService() {
-        WifiP2pManager.DnsSdTxtRecordListener txtListener = new WifiP2pManager.DnsSdTxtRecordListener() {
+        WifiP2pManager.UpnpServiceResponseListener myUpnpListener = new WifiP2pManager.UpnpServiceResponseListener() {
             @Override
-            public void onDnsSdTxtRecordAvailable(
-                    String fullDomain, Map<String, String> record, WifiP2pDevice device) {
-                String deviceName = record.get("");
-                String deviceAddress = device.deviceAddress;
-                if (deviceName != null) {
-                    Log.i("Scan --Text-- result", String.valueOf(System.currentTimeMillis()));
-                    if (deviceAddress != null) {
-                        Message msg = new Message();
-                        MsgStruct struct = new MsgStruct();
-                        struct.text = deviceName;
-                        struct.address = deviceAddress;
-                        msg.obj = struct;
-                        msg.what = FOUND_MESSAGE;
-                        myHandler.sendMessage(msg);
-                        if (struct.text != null) {
-                            Log.i("broadcastFoundMessage", struct.text);
-                            Log.i("MAC", struct.address);
+            public void onUpnpServiceAvailable(List<String> uniqueServiceNames, WifiP2pDevice device) {
+                for(String item:uniqueServiceNames) {
+                    String[] check=item.split("::");
+                    String deviceName=null;
+                    if(check.length!=2)
+                    {
+                        for (String itemCheck:check) {
+                            Log.i("split result", itemCheck);
+                        }
+                    }else {
+                        deviceName=check[1];
+                    }
+                    String deviceAddress = device.deviceAddress;
+                    if (deviceName != null) {
+                        Log.i("Scan --Text-- result", String.valueOf(System.currentTimeMillis()));
+                        if (deviceAddress != null) {
+                            Message msg = new Message();
+                            MsgStruct struct = new MsgStruct();
+                            struct.text = deviceName;
+                            struct.address = deviceAddress;
+                            msg.obj = struct;
+                            msg.what = FOUND_MESSAGE;
+                            myHandler.sendMessage(msg);
+                            if (struct.text != null) {
+                                Log.i("broadcastFoundMessage", struct.text);
+                                Log.i("MAC", struct.address);
+                            }
                         }
                     }
                 }
             }
         };
-        WifiP2pManager.DnsSdServiceResponseListener servListener = new WifiP2pManager.DnsSdServiceResponseListener() {
-            @Override
-            public void onDnsSdServiceAvailable(String instanceName, String type,
-                                                WifiP2pDevice device) {
-                Log.i("instanceName", instanceName);
-                Log.i("type", type);
-                Log.i("Scan --Serves-- result", String.valueOf(System.currentTimeMillis()));
-//                Log.i("device", device.toString());
-            }
-        };
-        manager.setDnsSdResponseListeners(channel, servListener, txtListener);
-        serviceRequest = WifiP2pDnsSdServiceRequest.newInstance();
+//        WifiP2pManager.DnsSdServiceResponseListener servListener = new WifiP2pManager.DnsSdServiceResponseListener() {
+//            @Override
+//            public void onDnsSdServiceAvailable(String instanceName, String type,
+//                                                WifiP2pDevice device) {
+//                Log.i("instanceName", instanceName);
+//                Log.i("type", type);
+//                Log.i("Scan --Serves-- result", String.valueOf(System.currentTimeMillis()));
+////                Log.i("device", device.toString());
+//            }
+//        };
+        manager.setUpnpServiceResponseListener(channel, myUpnpListener);
+        serviceRequest = WifiP2pUpnpServiceRequest.newInstance();
     }
     void runMyServerceDiscover() {
         stopDiscoverPeers();
@@ -273,21 +284,21 @@ public class ReceiveRadio_BLE extends Service {
     //Check the first 3 byte in array ,is it the REPLACEMENT CHARACTER in UTF8{(byte)0xef ,(byte)0xbf ,(byte)0xbd}
     boolean isHaveSignal(byte[] source) {
         boolean flag = false;
-//        final byte[] array=ChangeNameOfWIFI.Signal;
-//        if(array.length<source.length) {
-//            flag=true;
-//            for (int i = 0; i <array.length;i++){
-//                if(array[i]!=source[i]){
-//                    flag=false;
-//                }
-//            }
-//        }
-        int base = ChangeNameOfWIFI.baseByteMsg;
-        if (source[base - 3] <= source[base - 2]
-                &&(0xFF&source[base-1])<0x7F
-                ) {
-            flag = true;
+        final byte[] array=ChangeNameOfWIFI.Signal;
+        if(array.length<source.length) {
+            flag=true;
+            for (int i = 0; i <array.length;i++){
+                if(array[i]!=source[i]){
+                    flag=false;
+                }
+            }
         }
+//        int base = ChangeNameOfWIFI.baseByteMsg;
+//        if (source[base - 3] <= source[base - 2]
+//                &&(0xFF&source[base-1])<0x7F
+//                ) {
+//            flag = true;
+//        }
 
         return flag;
     }
@@ -389,8 +400,9 @@ public class ReceiveRadio_BLE extends Service {
                     long endSystemTime = System.currentTimeMillis() - start;
                     Log.i("Stop: ", Long.toString(endSystemTime));
                     String text = byteStitching(this.messageBodyList);
-                    if(!textList.contains(text)){
-                        textList.add(text);
+//                    if(!textList.contains(text)){
+//                        textList.add(text);
+                        if(true){
                         final String homePageUrl = getHomePageUrl(text);
                         String url = homePageUrl;
                         boolean isGetHomePage = false;

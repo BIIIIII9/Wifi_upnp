@@ -1,16 +1,4 @@
-#Sat Sep 15 04:19:41 MSK 2018
-path.3=classes.dex
-path.2=classes.dex
-path.1=classes.dex
-renamed.4=classes5.dex
+#Fri May 10 20:19:14 MSK 2019
+base.0=C\:\\Users\\kami\\Desktop\\Andriod\\app\\build\\intermediates\\transforms\\dexMerger\\debug\\0
 path.0=classes.dex
-renamed.3=classes4.dex
-renamed.2=classes3.dex
-renamed.1=classes2.dex
-base.4=C\:\\Users\\B9\\Desktop\\BluetoothRadio\\twopage\\app\\build\\intermediates\\transforms\\dexMerger\\debug\\123
 renamed.0=classes.dex
-base.3=C\:\\Users\\B9\\Desktop\\BluetoothRadio\\twopage\\app\\build\\intermediates\\transforms\\dexMerger\\debug\\120
-base.2=C\:\\Users\\B9\\Desktop\\BluetoothRadio\\twopage\\app\\build\\intermediates\\transforms\\dexMerger\\debug\\122
-base.1=C\:\\Users\\B9\\Desktop\\BluetoothRadio\\twopage\\app\\build\\intermediates\\transforms\\dexMerger\\debug\\124
-base.0=C\:\\Users\\B9\\Desktop\\BluetoothRadio\\twopage\\app\\build\\intermediates\\transforms\\dexMerger\\debug\\121
-path.4=classes.dex
