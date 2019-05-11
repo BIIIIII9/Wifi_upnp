@@ -60,6 +60,7 @@ public class ChangeNameOfWIFI extends Service {
     public void onCreate(){
         super.onCreate();
         myListServiceInfo=new ArrayList<>();
+        myLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
     }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -92,12 +93,10 @@ public class ChangeNameOfWIFI extends Service {
             //TODO:限制输入<128*248byte  把分隔程序split放到输入框
             intent = new Intent(MainActivity.ServiceOnDestroy);
             myLocalBroadcastManager.sendBroadcast(intent);
-            onDestroy();
             return START_NOT_STICKY;
         }
     }
     void startDiscoverWifiP2PService(final String message) {
-        myLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
         manager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         channel = manager.initialize(this, getMainLooper(), null);
         manager.clearLocalServices(channel, new WifiP2pManager.ActionListener() {
@@ -119,10 +118,10 @@ public class ChangeNameOfWIFI extends Service {
     public void onDestroy() {
         super.onDestroy();
         workFlagMyThread=false;
-        for(WifiP2pUpnpServiceInfo item : myListServiceInfo){
-            manager.removeLocalService(channel,item,null);
+        if(channel!=null) {
+            manager.clearLocalServices(channel, null);
+            manager.stopPeerDiscovery(channel, null);
         }
-        manager.stopPeerDiscovery(channel, null);
         stopForeground(true);
 //        Intent intent = new Intent(MainActivity.ServiceOnDestroy);
 //        myLocalBroadcastManager.sendBroadcast(intent);
